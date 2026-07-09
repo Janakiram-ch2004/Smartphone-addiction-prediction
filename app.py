@@ -3,12 +3,12 @@ import pandas as pd
 import joblib
 import numpy as np
 
-# Page UI Setup
-st.set_page_config(page_title="Smartphone Addiction Predictor", page_icon="📱", layout="wide")
+
+st.set_page_config(page_title="Smartphone Addiction Predictor", layout="wide")
 st.title("📱 Smartphone Addiction Predictor")
 st.write("Enter your daily screen time habits below, and our Machine Learning model will predict your addiction risk.")
 
-# 1. Saved Files Loading (Models & Preprocessors)
+
 try:
     model = joblib.load('random_forest_model.pkl')
     encoders = joblib.load('label_encoders.pkl')
@@ -18,7 +18,7 @@ except FileNotFoundError:
     st.error("Error: Required model files (.pkl) not found. Please run the training script first.")
     st.stop()
 
-# 2. User Input Form (Divided into two columns for a cleaner UI)
+
 col1, col2 = st.columns(2)
 
 with col1:
@@ -37,10 +37,9 @@ with col2:
     stress_level = st.selectbox("Stress Level", ["Low", "Medium", "High"])
     academic_impact = st.selectbox("Academic Work Impact", ["Yes", "No"])
 
-# 3. Prediction Button Logic
+
 if st.button("Predict Addiction", type="primary"):
     
-    # Converting user input into a Pandas DataFrame
     input_data = pd.DataFrame({
         'age': [age], 'gender': [gender], 'daily_screen_time_hours': [daily_screen_time],
         'social_media_hours': [social_media], 'gaming_hours': [gaming], 
@@ -49,24 +48,22 @@ if st.button("Predict Addiction", type="primary"):
         'weekend_screen_time': [weekend_screen_time], 'stress_level': [stress_level],
         'academic_work_impact': [academic_impact]
     })
-    
-    # Applying Label Encoding to categorical text data
+
     for col in input_data.select_dtypes(include=['object']).columns:
         if col in encoders:
             input_data[col] = encoders[col].transform(input_data[col])
             
-    # Scaling the numeric data using the loaded StandardScaler
+    
     scaled_data = scaler.transform(input_data)
     
-    # Selecting the best features using the loaded SelectKBest model
     final_features = selector.transform(scaled_data)
     
-    # Predicting the outcome using the trained Random Forest Classifier
+   
     prediction = model.predict(final_features)
     
-    # Displaying the final result
+  
     st.markdown("---")
     if prediction[0] == 1:
-        st.error("🚨 Warning: High signs of smartphone addiction detected! Consider reducing your screen time.")
+        st.error(" Warning: High signs of smartphone addiction detected! Consider reducing your screen time.")
     else:
-        st.success("✅ Great! You are in the safe zone. No severe addiction detected.")
+        st.success(" Great! You are in the safe zone. No severe addiction detected.")
